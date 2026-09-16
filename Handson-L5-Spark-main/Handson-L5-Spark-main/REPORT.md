@@ -216,4 +216,4 @@ There were a total of 18 jobs. Spark data is not cached so spark rereads the fil
 Anything that went wrong and what resolved it. Paste the actual error message. If nothing
 went wrong, say so.
 
-Everything wet smoothe
+Everything went smooth
