@@ -151,7 +151,7 @@ A few sentences on what you actually noticed. Some things worth looking at:
 - How many tasks and executors the Spark UI at <http://localhost:4040> listed for `show`
 - How long the job took, in the shell and with `spark-submit`
 
-
+Spark master page shows the job name, number of cores, Memory per Executor, and Submitted Time. The time of all the runs averaged out to 10 seconds .
 
 ---
 
@@ -164,6 +164,21 @@ The three changes you made to `wordcount.py`. Paste the lines you added or rewro
 
 ```
 
+
+from pyspark.sql.functions import explode, split, length, col, lower
+
+min_length = int(sys.argv[3]) if len(sys.argv) > 3 else 3  
+
+words = lines.select(lower(explode(split(col("value"), r"\s+"))).alias("word"))
+
+counts = (words.filter(length("word") >= min_length)
+               .groupBy("word").count()
+               .orderBy(col("count").desc(), col("word")))
+
+print(f"{counts.count()} words scanned")
+print(f"{counts.filter(length('word') >= min_length).count()} words of at least {min_length} characters")
+print(f"{counts.count()} distinct words")
+
 ---
 
 ## What the changes did
@@ -172,8 +187,8 @@ The three changes you made to `wordcount.py`. Paste the lines you added or rewro
 
 | Run | Min length | Words scanned | Words kept | Distinct words |
 | --- | ---------- | ------------- | ---------- | -------------- |
-| `wordcount-v2` | 3 | | | |
-| `wordcount-long` | | | | |
+| `wordcount-v2` | 3 |114 |92 |71 |
+| `wordcount-long` | 5 |114 |60 |51|
 
 ### The three outputs compared
 
@@ -181,14 +196,18 @@ How many distinct words did folding the case remove (compare `wordcount/` with
 `wordcount-v2/`)? How many did the longer minimum remove? Name one word from your own text
 whose count changed when the counting became case-insensitive.
 
+5 distinct words down
 
+for minimum 20 distinct words down
+
+"the" changes count
 
 ### Jobs
 
 How many jobs did your run launch, according to the **Jobs** tab, and how does that compare
 with the original program? Why does Spark read the same file more than once in a single run?
 
-
+There were a total of 18 jobs. Spark data is not cached so spark rereads the file.
 
 ---
 
@@ -197,4 +216,4 @@ with the original program? Why does Spark read the same file more than once in a
 Anything that went wrong and what resolved it. Paste the actual error message. If nothing
 went wrong, say so.
 
-
+Everything wet smoothe
